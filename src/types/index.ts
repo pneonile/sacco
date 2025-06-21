@@ -75,24 +75,72 @@ export interface Fine {
 export interface Investment {
   id: string;
   name: string;
-  type: 'fixed_deposit' | 'government_bonds' | 'treasury_bills' | 'real_estate' | 'equity';
+  type:
+    | 'fixed_deposit'
+    | 'government_bonds'
+    | 'treasury_bills'
+    | 'real_estate'
+    | 'equity'
+    | 'other';
   amount: number;
   interestRate: number;
   maturityDate: string;
   currentValue: number;
   status: 'active' | 'matured' | 'sold';
   purchaseDate: string;
+  /* --- extended fields --- */
+  investmentNumber?: string;
+  institutionName?: string;
+  institutionContact?: string;
+  interestPaymentSchedule?:
+    | 'monthly'
+    | 'quarterly'
+    | 'biannual'
+    | 'annual'
+    | 'maturity';
+  lastInterestPaymentDate?: string;
+  nextInterestPaymentDate?: string;
+  interestEarned?: number;
+  interestPaid?: number;
+  saleValue?: number;
+  saleDate?: string;
+  profitLoss?: number;
+  approvedBy?: string;
+  createdBy?: string;
+  updatedBy?: string;
 }
 
 export interface Communication {
   id: string;
   title: string;
   message: string;
-  type: 'sms' | 'email' | 'push';
+  type: 'sms' | 'email' | 'push' | 'whatsapp';
   recipients: string[];
   scheduledDate: string;
   sentDate?: string;
   status: 'draft' | 'scheduled' | 'sent' | 'failed';
+  /* --- extended fields --- */
+  templateId?: string;
+  subject?: string; // email
+  failureReason?: string;
+  retryCount?: number;
+  maxRetries?: number;
+  deliveredCount?: number;
+  failedCount?: number;
+  pendingCount?: number;
+  deliverySuccessRate?: number;
+  category?: string;
+  campaignId?: string;
+  tags?: string[];
+  attachments?: string[];
+  // WhatsApp specific
+  whatsappTemplateNamespace?: string;
+  whatsappTemplateName?: string;
+  whatsappTemplateLanguage?: string;
+  whatsappComponents?: string; // JSON stringified
+  createdBy?: string;
+  updatedBy?: string;
+  sentBy?: string;
 }
 
 export interface DashboardStats {
@@ -257,11 +305,26 @@ export interface Employer {
 export interface LedgerEntry {
   id: string;
   type: 'income' | 'expense';
-  category: string;
+  category_id: string;
   amount: number; // UGX
   description: string;
-  date: string;
+  transaction_date: string;
   reference?: string;
+  vendor_id?: string;
+  vendor_name?: string;
+  payment_method?: 'cash' | 'bank' | 'mobile_money' | 'check' | 'electronic_transfer';
+  is_paid?: boolean;
+  approval_status?: 'pending' | 'approved' | 'rejected';
+  tax_amount?: number;
+  tax_rate?: number;
+  tax_exempt?: boolean;
+  receipt_number?: string;
+  invoice_number?: string;
+  budget_line_id?: string;
+  custom_fields?: string; // JSON stringified
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 /**
@@ -275,4 +338,41 @@ export interface BankAccount {
   balance: number; // UGX
   lastReconciledAt?: string;
   status: 'active' | 'closed';
-}
+}
+
+/**
+ * Category for ledger entries (income / expense)
+ */
+export interface LedgerCategory {
+  id: string;
+  name: string;
+  type: 'income' | 'expense';
+  code?: string;
+  description?: string;
+  parent_id?: string;
+  annual_budget?: number;
+  monthly_budget?: number;
+  is_active: boolean;
+  display_order?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Vendor / supplier record used in expense ledger entries
+ */
+export interface Vendor {
+  id: string;
+  name: string;
+  contact_person?: string;
+  phone_number?: string;
+  email?: string;
+  address?: string;
+  tax_id?: string;
+  registration_number?: string;
+  bank_name?: string;
+  bank_account?: string;
+  is_active: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}

@@ -1,12 +1,12 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { 
-  User, 
-  Loan, 
-  Transaction, 
-  Account, 
-  Fine, 
-  Investment, 
-  Communication, 
+import {
+  User,
+  Loan,
+  Transaction,
+  Account,
+  Fine,
+  Investment,
+  Communication,
   DashboardStats,
   MemberOnboarding,
   Deposit,
@@ -16,11 +16,12 @@ import {
   Statement,
   Employer,
   LedgerEntry,
+  LedgerCategory,
   BankAccount,
   Checkoff,
-  MobileMoneyTransaction
+  MobileMoneyTransaction,
+  Vendor
 } from '../types';
-
 // Environment-based API URL configuration
 const API_URL = process.env.NODE_ENV === 'production' 
   ? process.env.REACT_APP_API_URL || 'https://api.kawempesacco.com/api/v1'
@@ -988,6 +989,14 @@ export const CommunicationsService = {
     } catch (error) {
       return handleApiError(error);
     }
+  },
+
+  async deleteCommunication(id: string): Promise<void> {
+    try {
+      await apiClient.delete(`/communications/${id}`);
+    } catch (error) {
+      return handleApiError(error);
+    }
   }
 };
 
@@ -1016,6 +1025,23 @@ export const AccountingService = {
   async updateLedgerEntry(id: string, entryData: Partial<LedgerEntry>): Promise<LedgerEntry> {
     try {
       const response = await apiClient.put<ApiResponse<LedgerEntry>>(`/ledger/${id}`, entryData);
+      return response.data.data;
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  async deleteLedgerEntry(id: string): Promise<void> {
+    try {
+      await apiClient.delete(`/ledger/${id}`);
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  async getLedgerCategories(): Promise<{categories: LedgerCategory[]}> {
+    try {
+      const response = await apiClient.get<ApiResponse<{categories: LedgerCategory[]}>>('/ledger/categories');
       return response.data.data;
     } catch (error) {
       return handleApiError(error);
