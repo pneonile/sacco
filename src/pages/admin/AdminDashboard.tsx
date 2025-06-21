@@ -1,5 +1,16 @@
 import React from 'react';
-import { Users, CreditCard, TrendingUp, DollarSign, UserPlus, AlertTriangle } from 'lucide-react';
+import { 
+  Users, 
+  CreditCard, 
+  TrendingUp, 
+  DollarSign, 
+  UserPlus, 
+  AlertTriangle,
+  Briefcase,
+  Star,
+  ClipboardList,
+  UserCheck
+} from 'lucide-react';
 import { StatCard } from '../../components/charts/StatCard';
 import { AreaChart } from '../../components/charts/AreaChart';
 import { Card } from '../../components/ui/Card';
@@ -24,32 +35,37 @@ const monthlyLoansData = [
   { name: 'Jun', value: 1350000 },
 ];
 
-const recentActivities = [
+// Enhanced to include staff attribution
+const mockStaffActivities = [
   { 
     id: 1, 
-    type: 'New Member', 
-    description: 'Sarah Nakato joined the SACCO', 
+    type: 'New Member Onboarded', 
+    description: 'Sarah Nakato joined the SACCO.', 
+    staffName: 'Grace Auma',
     time: '2 hours ago',
     status: 'success'
   },
   { 
     id: 2, 
     type: 'Loan Approved', 
-    description: 'Business loan for UGX 5,000,000 approved', 
+    description: 'Business loan for UGX 5,000,000 approved for John Doe.', 
+    staffName: 'Peter Loan',
     time: '4 hours ago',
     status: 'success'
   },
   { 
     id: 3, 
-    type: 'Large Deposit', 
-    description: 'UGX 2,000,000 deposited by John Doe', 
+    type: 'Deposit Captured', 
+    description: 'UGX 2,000,000 deposited by Robert Mugisha.', 
+    staffName: 'Grace Cashier',
     time: '6 hours ago',
     status: 'success'
   },
   { 
     id: 4, 
     type: 'Fine Issued', 
-    description: 'Late payment fine issued to Peter Ssali', 
+    description: 'Late payment fine issued to David Okello.', 
+    staffName: 'Jane Manager',
     time: '1 day ago',
     status: 'warning'
   },
@@ -60,6 +76,34 @@ const quickActions = [
   { icon: CreditCard, label: 'Approve Loan Application', color: 'text-blue-600' },
   { icon: DollarSign, label: 'Process Bulk Deposits', color: 'text-purple-600' },
   { icon: TrendingUp, label: 'Generate Monthly Report', color: 'text-orange-600' },
+];
+
+// New HR Mock Data
+const mockHrStats = {
+  totalStaff: 15,
+  activeStaff: 14,
+  departments: 5,
+  avgPerformance: 92.5,
+};
+
+const mockStaffPerformance = [
+  { name: 'Peter Loan', role: 'Loan Officer', metric: '25 Loans Processed', score: 5 },
+  { name: 'Grace Auma', role: 'Member Services', metric: '45 Members Assisted', score: 5 },
+  { name: 'Jane Manager', role: 'Manager', metric: '98% Team Uptime', score: 4 },
+];
+
+const mockDepartmentData = [
+  { name: 'Loan Officers', count: 4 },
+  { name: 'Member Services', count: 5 },
+  { name: 'Cashiers', count: 3 },
+  { name: 'Management', count: 2 },
+  { name: 'IT & Support', count: 1 },
+];
+
+const hrQuickActions = [
+  { icon: UserPlus, label: 'Add New Staff', color: 'text-blue-600' },
+  { icon: ClipboardList, label: 'View Payroll', color: 'text-green-600' },
+  { icon: UserCheck, label: 'Manage Leave Requests', color: 'text-purple-600' },
 ];
 
 export const AdminDashboard: React.FC = () => {
@@ -78,7 +122,14 @@ export const AdminDashboard: React.FC = () => {
   return (
     <div className="p-6">
       {/* Header Card */}
-      <div className="flex items-center justify-between bg-white rounded-lg p-6 shadow-sm border border-gray-200 mb-6">
+      <Card
+        variant="gradient"
+        interactive
+        glow
+        gradientDirection="diagonal"
+        className="flex items-center justify-between mb-6"
+        padding="lg"
+      >
         <div>
           <h1 className="text-2xl font-bold text-secondary-900">Admin Dashboard</h1>
           <p className="text-secondary-600 mt-1">
@@ -86,18 +137,18 @@ export const AdminDashboard: React.FC = () => {
           </p>
         </div>
         <div className="flex space-x-3">
-          <Button variant="outline" size="sm">
+          <Button variant="success" size="sm">
             <UserPlus className="h-4 w-4 mr-2" />
             Add Member
           </Button>
-          <Button size="sm">
+          <Button variant="info" size="sm">
             <TrendingUp className="h-4 w-4 mr-2" />
             View Reports
           </Button>
         </div>
-      </div>
+      </Card>
 
-      {/* Stats Grid */}
+      {/* Financial Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <StatCard
           title="Total Members"
@@ -153,50 +204,65 @@ export const AdminDashboard: React.FC = () => {
         </Card>
       </div>
 
-      {/* Quick Actions & Recent Activities */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {/* Quick Actions */}
-        <Card>
-          <h3 className="text-lg font-semibold text-secondary-900 mb-4">Quick Actions</h3>
-          <div className="space-y-3">
-            {quickActions.map((action, index) => (
-              <Button 
-                key={index}
-                variant="outline" 
-                className="w-full justify-start hover:bg-secondary-50 py-3"
-                size="sm"
-              >
-                <action.icon className={`h-5 w-5 mr-3 ${action.color}`} />
-                {action.label}
-              </Button>
-            ))}
-          </div>
-        </Card>
-
-        {/* Recent Activities */}
-        <Card>
-          <h3 className="text-lg font-semibold text-secondary-900 mb-4">Recent Activities</h3>
-          <div className="space-y-4">
-            {recentActivities.map((activity) => (
-              <div key={activity.id} className="flex items-start space-x-3 p-3 bg-secondary-50 rounded-lg">
-                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
-                  activity.status === 'success' ? 'bg-green-500' : 'bg-yellow-500'
-                }`}></div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-secondary-900">
-                    {activity.type}
-                  </p>
-                  <p className="text-sm text-secondary-600">
-                    {activity.description}
-                  </p>
-                  <p className="text-xs text-secondary-500 mt-1">
-                    {activity.time}
-                  </p>
+      {/* Human Resources Section */}
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-secondary-800 mb-4">Human Resources Overview</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+          <StatCard title="Total Staff" value={formatNumber(mockHrStats.totalStaff)} icon={Users} iconColor="text-blue-600" />
+          <StatCard title="Active Staff" value={formatNumber(mockHrStats.activeStaff)} icon={UserCheck} iconColor="text-green-600" />
+          <StatCard title="Departments" value={formatNumber(mockHrStats.departments)} icon={Briefcase} iconColor="text-purple-600" />
+          <StatCard title="Avg. Performance" value={`${mockHrStats.avgPerformance}%`} icon={Star} iconColor="text-yellow-600" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2">
+            <h3 className="text-lg font-semibold text-secondary-900 mb-4">Recent Staff Activities</h3>
+            <div className="space-y-4">
+              {mockStaffActivities.map((activity) => (
+                <div key={activity.id} className="flex items-start space-x-3 p-3 bg-secondary-50 rounded-lg">
+                  <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${activity.status === 'success' ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-secondary-900">{activity.type}</p>
+                    <p className="text-sm text-secondary-600">{activity.description}</p>
+                    <p className="text-xs text-secondary-500 mt-1">
+                      By <span className="font-semibold">{activity.staffName}</span> • {activity.time}
+                    </p>
+                  </div>
                 </div>
+              ))}
+            </div>
+          </Card>
+          <div className="space-y-6">
+            <Card>
+              <h3 className="text-lg font-semibold text-secondary-900 mb-4">Top Staff Performance</h3>
+              <div className="space-y-3">
+                {mockStaffPerformance.map((staff, index) => (
+                  <div key={index} className="flex items-center">
+                    <div className="flex-1">
+                      <p className="font-medium">{staff.name}</p>
+                      <p className="text-sm text-secondary-500">{staff.role}</p>
+                    </div>
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`h-4 w-4 ${i < staff.score ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </Card>
+            <Card>
+              <h3 className="text-lg font-semibold text-secondary-900 mb-4">HR Quick Actions</h3>
+              <div className="space-y-3">
+                {hrQuickActions.map((action, index) => (
+                  <Button key={index} variant="outline" className="w-full justify-start py-3" size="sm">
+                    <action.icon className={`h-5 w-5 mr-3 ${action.color}`} />
+                    {action.label}
+                  </Button>
+                ))}
+              </div>
+            </Card>
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* Alerts */}

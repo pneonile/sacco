@@ -6,6 +6,7 @@ import {
   Wallet,
   CreditCard,
   TrendingUp,
+  UserPlus,
   FileText,
   MessageSquare,
   Settings,
@@ -13,6 +14,8 @@ import {
   AlertTriangle,
   Receipt,
   Banknote,
+  Smartphone,
+  PieChart,
   X
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
@@ -27,6 +30,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { user } = useAuth();
 
   const adminNavItems = [
+    { icon: UserPlus, label: 'Onboarding', path: '/admin/onboarding' },
     { icon: LayoutDashboard, label: 'Dashboard', path: '/admin' },
     { icon: Users, label: 'Members', path: '/admin/members' },
     { icon: Wallet, label: 'Deposits', path: '/admin/deposits' },
@@ -34,18 +38,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     { icon: Receipt, label: 'Transactions', path: '/admin/transactions' },
     { icon: AlertTriangle, label: 'Fines', path: '/admin/fines' },
     { icon: Banknote, label: 'Checkoffs', path: '/admin/checkoffs' },
+    { icon: Smartphone, label: 'E-Wallets', path: '/admin/e-wallets' },
     { icon: TrendingUp, label: 'Investments', path: '/admin/investments' },
     { icon: FileText, label: 'Reports', path: '/admin/reports' },
     { icon: MessageSquare, label: 'Communications', path: '/admin/communications' },
+    { icon: PieChart, label: 'Income & Expense', path: '/admin/income-expense' },
     { icon: Settings, label: 'Settings', path: '/admin/settings' },
   ];
 
   const memberNavItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/member' },
     { icon: PiggyBank, label: 'My Accounts', path: '/member/accounts' },
+    { icon: Wallet, label: 'Deposits', path: '/member/deposits' },
     { icon: CreditCard, label: 'My Loans', path: '/member/loans' },
     { icon: Receipt, label: 'Transactions', path: '/member/transactions' },
     { icon: FileText, label: 'Statements', path: '/member/statements' },
+    { icon: MessageSquare, label: 'Messages', path: '/member/communications' },
+    { icon: Smartphone, label: 'E-Wallet', path: '/member/e-wallet' },
     { icon: Settings, label: 'Profile', path: '/member/profile' },
   ];
 

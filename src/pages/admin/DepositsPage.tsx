@@ -1,294 +1,184 @@
-import React, { useState } from 'react';
-import { Search, Plus, Filter, Download, Calendar, TrendingUp } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Wallet, Search, Filter, Download, User, PiggyBank, TrendingUp, FileText } from 'lucide-react';
+import { format, subDays } from 'date-fns';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { StatCard } from '../../components/charts/StatCard';
+import { Skeleton } from '../../components/ui/Skeleton';
+import { clsx } from 'clsx';
+import { Deposit, User as UserType } from '../../types';
 
-interface Deposit {
-  id: string;
-  memberNumber: string;
-  memberName: string;
-  accountType: 'savings' | 'fixed' | 'special';
-  amount: number;
-  date: string;
-  method: 'cash' | 'bank' | 'mobile_money' | 'checkoff';
-  reference: string;
-  status: 'completed' | 'pending' | 'failed';
-}
+// --- Mock Data (Self-contained for stability) ---
 
-const mockDeposits: Deposit[] = [
-  {
-    id: '1',
-    memberNumber: 'KS001',
-    memberName: 'John Doe',
-    accountType: 'savings',
-    amount: 500000,
-    date: '2024-01-15',
-    method: 'mobile_money',
-    reference: 'MM240115001',
-    status: 'completed',
-  },
-  {
-    id: '2',
-    memberNumber: 'KS002',
-    memberName: 'Sarah Nakato',
-    accountType: 'fixed',
-    amount: 1000000,
-    date: '2024-01-15',
-    method: 'bank',
-    reference: 'BNK240115002',
-    status: 'completed',
-  },
-  {
-    id: '3',
-    memberNumber: 'KS003',
-    memberName: 'Peter Ssebugwawo',
-    accountType: 'savings',
-    amount: 300000,
-    date: '2024-01-14',
-    method: 'checkoff',
-    reference: 'CHK240114003',
-    status: 'completed',
-  },
-  {
-    id: '4',
-    memberNumber: 'KS004',
-    memberName: 'Mary Johnson',
-    accountType: 'special',
-    amount: 750000,
-    date: '2024-01-14',
-    method: 'cash',
-    reference: 'CSH240114004',
-    status: 'pending',
-  },
-  {
-    id: '5',
-    memberNumber: 'KS005',
-    memberName: 'David Mukasa',
-    accountType: 'savings',
-    amount: 200000,
-    date: '2024-01-13',
-    method: 'mobile_money',
-    reference: 'MM240113005',
-    status: 'failed',
-  },
+const mockUsers: UserType[] = [
+  { id: '1', firstName: 'John', lastName: 'Doe', memberNumber: 'KS001', email: 'john.doe@example.com', role: 'member', phoneNumber: '+256701234567', idNumber: 'CM90123456ABCD', address: '', joinDate: '', status: 'active' },
+  { id: '2', firstName: 'Sarah', lastName: 'Nakato', memberNumber: 'KS002', email: 'sarah.nakato@example.com', role: 'member', phoneNumber: '+256772345678', idNumber: 'CM85098765WXYZ', address: '', joinDate: '', status: 'active' },
+  { id: '3', firstName: 'Robert', lastName: 'Mugisha', memberNumber: 'KS003', email: 'robert.mugisha@example.com', role: 'member', phoneNumber: '+256753456789', idNumber: 'CM92112233EFGH', address: '', joinDate: '', status: 'active' },
 ];
 
+const generateMockDeposits = (): Deposit[] => {
+  const deposits: Deposit[] = [];
+  const categories: ('savings' | 'fixed' | 'special')[] = ['savings', 'fixed', 'special'];
+  const channels: ('cash' | 'bank' | 'mobile_money')[] = ['cash', 'bank', 'mobile_money'];
+  
+  for (let i = 0; i < 20; i++) {
+    const randomUser = mockUsers[Math.floor(Math.random() * mockUsers.length)];
+    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+    const randomChannel = channels[Math.floor(Math.random() * channels.length)];
+    const randomAmount = Math.floor(Math.random() * 900000) + 100000;
+    const randomDaysAgo = Math.floor(Math.random() * 60);
+    const date = format(subDays(new Date(), randomDaysAgo), 'yyyy-MM-dd');
+    
+    deposits.push({
+      id: `dep-${i + 1}`,
+      memberId: randomUser.id,
+      category: randomCategory,
+      amount: randomAmount,
+      date: date,
+      receiptNumber: `REC-${String(i + 1).padStart(5, '0')}`,
+      channel: randomChannel,
+      reference: randomChannel !== 'cash' ? `REF${Math.floor(Math.random() * 1000000)}` : '',
+    });
+  }
+  return deposits.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+};
+
+// --- Utility Functions ---
+
+const formatUGX = (amount: number): string => {
+  return new Intl.NumberFormat('en-UG', {
+    style: 'currency',
+    currency: 'UGX',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+const formatDate = (dateString: string): string => {
+  return format(new Date(dateString), 'dd MMM yyyy');
+};
+
+// --- Component ---
+
 export const DepositsPage: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [accountTypeFilter, setAccountTypeFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [isLoading, setIsLoading] = useState(true);
+  const [deposits, setDeposits] = useState<Deposit[]>([]);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-UG', {
-      style: 'currency',
-      currency: 'UGX',
-      minimumFractionDigits: 0,
-    }).format(amount);
+  useEffect(() => {
+    // Simulate API call
+    setTimeout(() => {
+      const mockData = generateMockDeposits();
+      setDeposits(mockData);
+      setIsLoading(false);
+    }, 1000);
+  }, []);
+
+  const stats = {
+    totalDeposits: deposits.reduce((sum, dep) => sum + dep.amount, 0),
+    savingsDeposits: deposits.filter(d => d.category === 'savings').reduce((sum, dep) => sum + dep.amount, 0),
+    fixedDeposits: deposits.filter(d => d.category === 'fixed').reduce((sum, dep) => sum + dep.amount, 0),
   };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'failed':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getMethodColor = (method: string) => {
-    switch (method) {
-      case 'mobile_money':
-        return 'bg-blue-100 text-blue-800';
-      case 'bank':
-        return 'bg-purple-100 text-purple-800';
-      case 'cash':
-        return 'bg-green-100 text-green-800';
-      case 'checkoff':
-        return 'bg-orange-100 text-orange-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const filteredDeposits = mockDeposits.filter(deposit => {
-    const matchesSearch = 
-      deposit.memberName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      deposit.memberNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      deposit.reference.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesAccountType = accountTypeFilter === 'all' || deposit.accountType === accountTypeFilter;
-    const matchesStatus = statusFilter === 'all' || deposit.status === statusFilter;
-    
-    return matchesSearch && matchesAccountType && matchesStatus;
-  });
-
-  const totalDeposits = mockDeposits.reduce((sum, deposit) => 
-    deposit.status === 'completed' ? sum + deposit.amount : sum, 0
-  );
-  const pendingDeposits = mockDeposits.filter(d => d.status === 'pending').length;
-  const todayDeposits = mockDeposits.filter(d => d.date === '2024-01-15').length;
 
   return (
     <div className="p-6">
-      {/* Header Card */}
-      <div className="flex items-center justify-between bg-white rounded-lg p-6 shadow-sm border border-gray-200 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-secondary-900">Deposits</h1>
-          <p className="text-secondary-600 mt-1">
-            Track and manage member deposits across all account types
-          </p>
-        </div>
-        <div className="flex space-x-3">
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            Record Deposit
-          </Button>
-        </div>
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-secondary-900">Deposits Management</h1>
+        <p className="text-secondary-600 mt-1">
+          Track and manage all member deposits.
+        </p>
       </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <StatCard
-          title="Total Deposits Today"
-          value={formatCurrency(totalDeposits)}
-          change="+12.5% from yesterday"
-          changeType="positive"
-          icon={TrendingUp}
-          iconColor="text-green-600"
-        />
-        <StatCard
-          title="Pending Deposits"
-          value={pendingDeposits.toString()}
-          change="Awaiting confirmation"
-          changeType="neutral"
-          icon={Calendar}
-          iconColor="text-yellow-600"
-        />
-        <StatCard
-          title="Deposits Today"
-          value={todayDeposits.toString()}
-          change="Transactions processed"
-          changeType="positive"
-          icon={TrendingUp}
-          iconColor="text-blue-600"
-        />
-        <StatCard
-          title="Average Deposit"
-          value={formatCurrency(totalDeposits / mockDeposits.length)}
-          change="Per transaction"
-          changeType="neutral"
-          icon={TrendingUp}
-          iconColor="text-purple-600"
-        />
-      </div>
-
-      {/* Filters */}
-      <Card className="mb-6">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 h-4 w-4" />
-              <input
-                type="text"
-                placeholder="Search deposits..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-secondary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
-              />
+      
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+        <Card>
+          <div className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-secondary-600">Total Deposits</p>
+              {isLoading ? <Skeleton height={30} width={120} /> : <p className="text-2xl font-bold text-secondary-900 mt-1">{formatUGX(stats.totalDeposits)}</p>}
             </div>
+            <div className="bg-primary-50 p-3 rounded-full"><Wallet className="h-6 w-6 text-primary-600" /></div>
           </div>
-          <div className="flex gap-3">
-            <select
-              value={accountTypeFilter}
-              onChange={(e) => setAccountTypeFilter(e.target.value)}
-              className="px-3 py-2 border border-secondary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
-            >
-              <option value="all">All Account Types</option>
-              <option value="savings">Savings</option>
-              <option value="fixed">Fixed Deposit</option>
-              <option value="special">Special</option>
-            </select>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-secondary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
-            >
-              <option value="all">All Status</option>
-              <option value="completed">Completed</option>
-              <option value="pending">Pending</option>
-              <option value="failed">Failed</option>
-            </select>
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-              More Filters
-            </Button>
+        </Card>
+        <Card>
+          <div className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-secondary-600">Savings Deposits</p>
+              {isLoading ? <Skeleton height={30} width={120} /> : <p className="text-2xl font-bold text-green-600 mt-1">{formatUGX(stats.savingsDeposits)}</p>}
+            </div>
+            <div className="bg-green-50 p-3 rounded-full"><PiggyBank className="h-6 w-6 text-green-600" /></div>
           </div>
-        </div>
-      </Card>
-
+        </Card>
+        <Card>
+          <div className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-secondary-600">Fixed Deposits</p>
+              {isLoading ? <Skeleton height={30} width={120} /> : <p className="text-2xl font-bold text-blue-600 mt-1">{formatUGX(stats.fixedDeposits)}</p>}
+            </div>
+            <div className="bg-blue-50 p-3 rounded-full"><TrendingUp className="h-6 w-6 text-blue-600" /></div>
+          </div>
+        </Card>
+      </div>
+      
       {/* Deposits Table */}
       <Card>
+        <div className="p-4 border-b flex justify-between items-center">
+            <h3 className="text-lg font-semibold">All Deposits</h3>
+            <Button variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+            </Button>
+        </div>
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-secondary-200">
-                <th className="text-left py-3 px-4 font-medium text-secondary-900">Member</th>
-                <th className="text-left py-3 px-4 font-medium text-secondary-900">Account Type</th>
-                <th className="text-left py-3 px-4 font-medium text-secondary-900">Amount</th>
-                <th className="text-left py-3 px-4 font-medium text-secondary-900">Method</th>
-                <th className="text-left py-3 px-4 font-medium text-secondary-900">Date</th>
-                <th className="text-left py-3 px-4 font-medium text-secondary-900">Reference</th>
-                <th className="text-left py-3 px-4 font-medium text-secondary-900">Status</th>
+          <table className="min-w-full divide-y divide-secondary-200">
+            <thead className="bg-secondary-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase">Member</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase">Amount</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase">Category</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase">Channel</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 uppercase">Receipt #</th>
               </tr>
             </thead>
-            <tbody>
-              {filteredDeposits.map((deposit) => (
-                <tr key={deposit.id} className="border-b border-secondary-100 hover:bg-secondary-50">
-                  <td className="py-4 px-4">
-                    <div>
-                      <p className="font-medium text-secondary-900">{deposit.memberName}</p>
-                      <p className="text-sm text-secondary-600">{deposit.memberNumber}</p>
-                    </div>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-primary-100 text-primary-800 capitalize">
-                      {deposit.accountType.replace('_', ' ')}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <p className="font-medium text-secondary-900">
-                      {formatCurrency(deposit.amount)}
-                    </p>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full capitalize ${getMethodColor(deposit.method)}`}>
-                      {deposit.method.replace('_', ' ')}
-                    </span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <p className="text-sm text-secondary-900">
-                      {new Date(deposit.date).toLocaleDateString()}
-                    </p>
-                  </td>
-                  <td className="py-4 px-4">
-                    <p className="text-sm font-mono text-secondary-900">{deposit.reference}</p>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full capitalize ${getStatusColor(deposit.status)}`}>
-                      {deposit.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+            <tbody className="bg-white divide-y divide-secondary-200">
+              {isLoading ? (
+                Array(5).fill(0).map((_, index) => (
+                  <tr key={index}>
+                    <td className="px-6 py-4"><Skeleton height={20} width={150} /></td>
+                    <td className="px-6 py-4"><Skeleton height={20} width={100} /></td>
+                    <td className="px-6 py-4"><Skeleton height={20} width={80} /></td>
+                    <td className="px-6 py-4"><Skeleton height={20} width={100} /></td>
+                    <td className="px-6 py-4"><Skeleton height={20} width={100} /></td>
+                    <td className="px-6 py-4"><Skeleton height={20} width={80} /></td>
+                  </tr>
+                ))
+              ) : (
+                deposits.map((deposit) => {
+                  const member = mockUsers.find(u => u.id === deposit.memberId);
+                  return (
+                    <tr key={deposit.id} className="hover:bg-secondary-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-secondary-900">{member ? `${member.firstName} ${member.lastName}` : 'N/A'}</div>
+                        <div className="text-sm text-secondary-500">{member?.memberNumber}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-secondary-900">{formatUGX(deposit.amount)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={clsx(
+                          "px-2 inline-flex text-xs leading-5 font-semibold rounded-full",
+                          deposit.category === 'savings' && "bg-green-100 text-green-800",
+                          deposit.category === 'fixed' && "bg-blue-100 text-blue-800",
+                          deposit.category === 'special' && "bg-purple-100 text-purple-800"
+                        )}>
+                          {deposit.category}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-600 capitalize">{deposit.channel.replace('_', ' ')}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-500">{formatDate(deposit.date)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-secondary-500">{deposit.receiptNumber}</td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>

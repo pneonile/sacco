@@ -1,3 +1,159 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ------------------------------------------------------------------
+  Global UI / UX Enhancements
+-------------------------------------------------------------------*/
+
+/* 1. Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 2. Modern smooth transitions for interactive elements */
+a,
+button,
+input,
+select,
+textarea {
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+/* 3. Improved focus styles */
+:focus-visible {
+  outline: 2px solid rgb(99 102 241); /* Indigo-500 */
+  outline-offset: 2px;
+}
+
+/* 4. Shimmer animation for skeleton loaders */
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.animate-shimmer {
+  background-size: 400% 100%;
+  animation: shimmer 1.8s infinite linear;
+}
+
+/* 5. Custom gradient animations */
+@keyframes gradient-x {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-x 8s ease infinite;
+}
+
+/* ------------------------------------------------------------------
+  Extra Animations (blob, float, fade-in) & Delay Utilities
+-------------------------------------------------------------------*/
+
+/* 8. Organic blob animation (used for decorative circles) */
+@keyframes blob {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -20px) scale(1.05);
+  }
+  66% {
+    transform: translate(-25px, 15px) scale(0.95);
+  }
+}
+.animate-blob {
+  animation: blob 8s ease-in-out infinite;
+}
+
+/* 9. Subtle float animation (e.g. for logo) */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* 10. Fade-in with translate (feedback messages etc.) */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease forwards;
+}
+
+/* 11. Animation delay helpers (utility classes) */
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+/* 6. Glass-morphism utility classes */
+.glass-light {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.glass-dark {
+  background: rgba(30, 41, 59, 0.46);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* 7. Better scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.4); /* slate-500/40 */
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 116, 139, 0.6);
+}
+
+/* Utility to hide scrollbar but keep scrollability */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}

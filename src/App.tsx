@@ -9,6 +9,11 @@ import { MembersPage } from './pages/admin/MembersPage';
 import { DepositsPage } from './pages/admin/DepositsPage';
 import { LoansPage } from './pages/admin/LoansPage';
 import { TransactionsPage } from './pages/admin/TransactionsPage';
+import { OnboardingPage } from './pages/admin/OnboardingPage';
+import { FinesPage } from './pages/admin/FinesPage';
+import { MobileMoneyPage } from './pages/admin/MobileMoneyPage';
+import { ReportsPage } from './pages/admin/ReportsPage';
+import { SettingsPage } from './pages/admin/SettingsPage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: string }> = ({ 
   children, 
@@ -38,6 +43,20 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: strin
   return <Layout>{children}</Layout>;
 };
 
+/**
+ * Temporary placeholder component for routes that are
+ * not yet implemented.  This prevents build-time errors
+ * while allowing us to register all required paths.
+ * Replace each usage with the actual page component
+ * as it gets developed.
+ */
+const PlaceholderPage: React.FC<{ title: string }> = ({ title }) => (
+  <div className="p-6">
+    <h1 className="text-2xl font-bold text-secondary-900 mb-2">{title}</h1>
+    <p className="text-secondary-600">This feature is coming soon.</p>
+  </div>
+);
+
 const AppRoutes: React.FC = () => {
   const { user } = useAuth();
 
@@ -49,6 +68,122 @@ const AppRoutes: React.FC = () => {
         element={
           <ProtectedRoute requiredRole="admin">
             <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ---------- Admin Extended Modules ---------- */}
+      <Route
+        path="/admin/onboarding"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <OnboardingPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/fines"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <FinesPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/checkoffs"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <PlaceholderPage title="Payroll Check-offs" />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/e-wallets"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <MobileMoneyPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/reports"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <ReportsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/statements"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <PlaceholderPage title="Statements Viewer" />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/communications"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <PlaceholderPage title="Communications & Notifications" />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/investments"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <PlaceholderPage title="SACCO Investment Tracker" />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/income-expense"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <PlaceholderPage title="Income & Expense Management" />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/settings"
+        element={
+          <ProtectedRoute requiredRole="admin">
+            <SettingsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ---------- Member Extended Modules ---------- */}
+      <Route
+        path="/member/deposits"
+        element={
+          <ProtectedRoute requiredRole="member">
+            <PlaceholderPage title="My Deposits" />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/member/statements"
+        element={
+          <ProtectedRoute requiredRole="member">
+            <PlaceholderPage title="My Statements" />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/member/communications"
+        element={
+          <ProtectedRoute requiredRole="member">
+            <PlaceholderPage title="Messages & Notifications" />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/member/e-wallet"
+        element={
+          <ProtectedRoute requiredRole="member">
+            <PlaceholderPage title="My E-Wallet" />
           </ProtectedRoute>
         }
       />
