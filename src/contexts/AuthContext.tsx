@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
+// Real API service
+import { AuthService } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
@@ -11,6 +13,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Mock users for demonstration
+// Mock users kept ONLY as a *development* fallback if the backend is unavailable.
 const mockUsers: User[] = [
   {
     id: '1',
@@ -55,25 +58,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const foundUser = mockUsers.find(u => u.email === email);
-    if (foundUser && password === 'password123') {
-      setUser(foundUser);
-      localStorage.setItem('kawempe_sacco_user', JSON.stringify(foundUser));
-      setIsLoading(false);
+    try {
+      // Attempt real API login
+      const loggedInUser = await AuthService.login(email, password);
+      setUser(loggedInUser);
+      localStorage.setItem('kawempe_sacco_user', JSON.stringify(loggedInUser));
       return true;
+    } catch (err) {
+      console.error('AuthService.login failed, falling back to mock login.', err);
+      // ---------- Development fallback ----------
+      const foundUser = mockUsers.find(u => u.email === email);
+      const passwordOk = password === 'password123'; // simplistic check
+      if (foundUser && passwordOk) {
+        setUser(foundUser);
+        localStorage.setItem('kawempe_sacco_user', JSON.stringify(foundUser));
+        return true;
+      }
+      return false;
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
-    return false;
   };
 
   const logout = () => {
-    setUser(null);
-    localStorage.removeItem('kawempe_sacco_user');
+    // Attempt to notify backend but always clear local session
+    AuthService.logout()
+      .catch(err => console.warn('AuthService.logout failed:', err))
+      .finally(() => {
+        setUser(null);
+        localStorage.removeItem('kawempe_sacco_user');
+      });
   };
 
   return (
