@@ -15,6 +15,9 @@ import { StatCard } from '../../components/charts/StatCard';
 import { AreaChart } from '../../components/charts/AreaChart';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import { InvestmentWidget } from '../../components/dashboard/InvestmentWidget';
+import { CommunicationsWidget } from '../../components/dashboard/CommunicationsWidget';
+import { FinancialOverviewWidget } from '../../components/dashboard/FinancialOverviewWidget';
 import { mockDashboardStats } from '../../data/mockData';
 
 const monthlyDepositsData = [
@@ -204,6 +207,18 @@ export const AdminDashboard: React.FC = () => {
         </Card>
       </div>
 
+      {/* Enhanced Modules Overview */}
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-secondary-800 mb-4">
+          Enhanced Modules Overview
+        </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <InvestmentWidget />
+          <CommunicationsWidget />
+          <FinancialOverviewWidget />
+        </div>
+      </div>
+
       {/* Human Resources Section */}
       <div className="mb-6">
         <h2 className="text-xl font-bold text-secondary-800 mb-4">Human Resources Overview</h2>
@@ -264,21 +279,3 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Alerts */}
-      <Card className="border-l-4 border-l-yellow-500 bg-yellow-50">
-        <div className="flex items-start space-x-3">
-          <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
-          <div>
-            <h4 className="font-medium text-secondary-900">Pending Actions Required</h4>
-            <ul className="mt-2 text-sm text-secondary-700 space-y-1">
-              <li>• {mockDashboardStats.pendingApplications} loan applications pending approval</li>
-              <li>• 5 members have overdue loan payments</li>
-              <li>• 2 investment certificates expiring this month</li>
-            </ul>
-          </div>
-        </div>
-      </Card>
-    </div>
-  );
-};

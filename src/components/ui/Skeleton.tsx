@@ -1,188 +1,40 @@
 import React from 'react';
-import { clsx } from 'clsx';
 
 interface SkeletonProps {
-  /**
-   * The variant of skeleton to display
-   */
-  variant?: 'text' | 'card' | 'avatar' | 'button' | 'custom';
-  
-  /**
-   * Width of the skeleton
-   */
-  width?: string | number;
-  
-  /**
-   * Height of the skeleton
-   */
   height?: string | number;
-  
-  /**
-   * Border radius of the skeleton
-   */
-  borderRadius?: string | number;
-  
-  /**
-   * Animation type
-   */
-  animation?: 'pulse' | 'wave' | 'none';
-  
-  /**
-   * Number of lines for text variant
-   */
-  lines?: number;
-  
-  /**
-   * Size preset for common elements
-   */
-  size?: 'sm' | 'md' | 'lg' | 'xl';
-  
-  /**
-   * Additional CSS classes
-   */
+  width?: string | number;
   className?: string;
-  
-  /**
-   * For custom shapes and layouts
-   */
-  children?: React.ReactNode;
 }
 
-/**
- * Skeleton component for loading states with configurable variants and animations
- */
-export const Skeleton: React.FC<SkeletonProps> = ({
-  variant = 'text',
-  width,
-  height,
-  borderRadius,
-  animation = 'pulse',
-  lines = 1,
-  size = 'md',
-  className,
-  children,
-}) => {
-  // Size presets
-  const sizePresets = {
-    sm: { text: 'h-3', avatar: 'h-8 w-8', button: 'h-8 w-20', card: 'h-24' },
-    md: { text: 'h-4', avatar: 'h-12 w-12', button: 'h-10 w-24', card: 'h-32' },
-    lg: { text: 'h-5', avatar: 'h-16 w-16', button: 'h-12 w-32', card: 'h-48' },
-    xl: { text: 'h-6', avatar: 'h-24 w-24', button: 'h-14 w-40', card: 'h-64' },
+const Skeleton: React.FC<SkeletonProps> = ({ height = '1rem', width = '100%', className }) => {
+  const style = {
+    height: typeof height === 'number' ? `${height}px` : height,
+    width: typeof width === 'number' ? `${width}px` : width,
   };
 
-  // Animation classes
-  const animationClasses = {
-    pulse: 'animate-pulse',
-    wave: 'skeleton-wave',
-    none: '',
-  };
-
-  // Base styles for all skeletons
-  const baseStyles = clsx(
-    'bg-gradient-to-r from-secondary-100 via-secondary-50 to-secondary-100 bg-[length:400%_100%]',
-    animation === 'wave' && 'animate-shimmer',
-    animation === 'pulse' && 'animate-pulse',
-    'rounded'
-  );
-
-  // Get preset dimensions based on variant and size
-  const getPresetDimensions = () => {
-    if (variant === 'custom') return '';
-    return sizePresets[size][variant as keyof typeof sizePresets[typeof size]] || '';
-  };
-
-  // Custom styles based on props
-  const customStyles = {
-    width: width ? (typeof width === 'number' ? `${width}px` : width) : '',
-    height: height ? (typeof height === 'number' ? `${height}px` : height) : '',
-    borderRadius: borderRadius ? (typeof borderRadius === 'number' ? `${borderRadius}px` : borderRadius) : '',
-  };
-
-  // Render different variants
-  const renderVariant = () => {
-    switch (variant) {
-      case 'text':
-        return (
-          <div className="space-y-2 w-full">
-            {Array.from({ length: lines }).map((_, index) => (
-              <div
-                key={index}
-                className={clsx(
-                  baseStyles,
-                  getPresetDimensions(),
-                  index === lines - 1 && lines > 1 ? 'w-4/5' : 'w-full',
-                )}
-                style={customStyles}
-              />
-            ))}
-          </div>
-        );
-      
-      case 'avatar':
-        return (
-          <div
-            className={clsx(
-              baseStyles,
-              getPresetDimensions(),
-              'rounded-full'
-            )}
-            style={customStyles}
-          />
-        );
-      
-      case 'button':
-        return (
-          <div
-            className={clsx(
-              baseStyles,
-              getPresetDimensions(),
-              'rounded-lg'
-            )}
-            style={customStyles}
-          />
-        );
-      
-      case 'card':
-        return (
-          <div
-            className={clsx(
-              baseStyles,
-              getPresetDimensions(),
-              'w-full rounded-xl'
-            )}
-            style={customStyles}
-          >
-            {children}
-          </div>
-        );
-      
-      case 'custom':
-        return (
-          <div
-            className={clsx(baseStyles)}
-            style={customStyles}
-          >
-            {children}
-          </div>
-        );
-      
-      default:
-        return null;
-    }
-  };
-
+  // This component uses Tailwind CSS's `animate-pulse` for a loading effect.
+  // For a more advanced "shimmer" effect (where a light band moves across),
+  // custom CSS keyframes would typically be defined in `tailwind.config.js`
+  // or a global CSS file (e.g., `keyframes: { shimmer: { ... } }` and `animation: { shimmer: 'shimmer 1.5s infinite' }`).
+  // Since this component file cannot define global CSS, `animate-pulse` is used
+  // as the standard Tailwind way to indicate a loading state.
   return (
-    <div className={clsx('skeleton', className)}>
-      {renderVariant()}
+    <div
+      className={`relative overflow-hidden bg-gray-200 rounded-md ${className || ''} animate-pulse`}
+      style={style}
+    >
+      {/* A true shimmer effect would typically involve a moving linear gradient,
+          e.g., via a pseudo-element or an inner div with a custom animation.
+          Example (requires global CSS/Tailwind config setup):
+          <div className="absolute inset-0 animate-shimmer"
+            style={{
+              background: 'linear-gradient(to right, #f0f0f0 8%, #e0e0e0 18%, #f0f0f0 33%)',
+              backgroundSize: '1200px 100%',
+            }}
+          />
+      */}
     </div>
   );
 };
 
-// Add this to your global CSS or index.css
-// @keyframes shimmer {
-//   0% { background-position: 100% 0; }
-//   100% { background-position: -100% 0; }
-// }
-// .animate-shimmer {
-//   animation: shimmer 2s infinite;
-// }
+export default Skeleton;
