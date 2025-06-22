@@ -14,6 +14,9 @@ import { FinesPage } from './pages/admin/FinesPage';
 import { MobileMoneyPage } from './pages/admin/MobileMoneyPage';
 import { ReportsPage } from './pages/admin/ReportsPage';
 import { SettingsPage } from './pages/admin/SettingsPage';
+import { InvestmentsPage } from './pages/admin/InvestmentsPage';
+import { CommunicationsPage } from './pages/admin/CommunicationsPage';
+import { IncomeExpensePage } from './pages/admin/IncomeExpensePage';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode; requiredRole?: string }> = ({ 
   children, 
@@ -125,7 +128,7 @@ const AppRoutes: React.FC = () => {
         path="/admin/communications"
         element={
           <ProtectedRoute requiredRole="admin">
-            <PlaceholderPage title="Communications & Notifications" />
+            <CommunicationsPage />
           </ProtectedRoute>
         }
       />
@@ -133,7 +136,7 @@ const AppRoutes: React.FC = () => {
         path="/admin/investments"
         element={
           <ProtectedRoute requiredRole="admin">
-            <PlaceholderPage title="SACCO Investment Tracker" />
+            <InvestmentsPage />
           </ProtectedRoute>
         }
       />
@@ -141,7 +144,7 @@ const AppRoutes: React.FC = () => {
         path="/admin/income-expense"
         element={
           <ProtectedRoute requiredRole="admin">
-            <PlaceholderPage title="Income & Expense Management" />
+            <IncomeExpensePage />
           </ProtectedRoute>
         }
       />
@@ -244,7 +247,12 @@ const AppRoutes: React.FC = () => {
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <div className="App">
           <AppRoutes />
         </div>

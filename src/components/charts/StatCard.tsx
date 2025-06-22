@@ -1,17 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { DivideIcon as LucideIcon } from 'lucide-react';
+import React, { useEffect, useRef, useState, ReactNode } from 'react';
+import { LucideIcon } from 'lucide-react';
 import { Card } from '../ui/Card';
 import { clsx } from 'clsx';
+import { Skeleton } from '../ui/Skeleton';
 
 interface StatCardProps {
   title: string;
-  value: string;
+  value: string | ReactNode;
   change?: string;
   changeType?: 'positive' | 'negative' | 'neutral';
   icon: LucideIcon;
   iconColor?: string;
   isImportant?: boolean;
   animationDelay?: number;
+  loading?: boolean;
 }
 
 export const StatCard: React.FC<StatCardProps> = ({
@@ -23,26 +25,27 @@ export const StatCard: React.FC<StatCardProps> = ({
   iconColor = 'text-primary-600',
   isImportant = false,
   animationDelay = 0,
+  loading = false,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [displayValue, setDisplayValue] = useState('0');
+  const [displayValue, setDisplayValue] = useState<string | ReactNode>('0');
   const cardRef = useRef<HTMLDivElement>(null);
-  
-  // Extract numeric value for animation
-  const numericValue = parseInt(value.replace(/[^0-9]/g, '')) || 0;
-  
+
+  // Safely parse numeric value only if value is a string
+  const numericValue = !loading && typeof value === 'string' ? parseInt(value.replace(/[^0-9]/g, ''), 10) || 0 : 0;
+
   const changeColors = {
     positive: 'text-green-600',
     negative: 'text-red-600',
     neutral: 'text-secondary-600',
   };
-  
+
   const changeIcons = {
     positive: '↑',
     negative: '↓',
     neutral: '•',
   };
-  
+
   const iconGradients = {
     'text-green-600': 'bg-gradient-to-br from-green-50 to-green-100',
     'text-blue-600': 'bg-gradient-to-br from-blue-50 to-blue-100',
@@ -51,12 +54,10 @@ export const StatCard: React.FC<StatCardProps> = ({
     'text-primary-600': 'bg-gradient-to-br from-primary-50 to-primary-100',
     'text-red-600': 'bg-gradient-to-br from-red-50 to-red-100',
   };
-  
-  // Determine which gradient to use based on iconColor
+
   const gradientClass = iconGradients[iconColor as keyof typeof iconGradients] || iconGradients['text-primary-600'];
 
   useEffect(() => {
-    // Staggered entrance animation
     const timer = setTimeout(() => {
       setIsVisible(true);
     }, animationDelay);
@@ -65,44 +66,48 @@ export const StatCard: React.FC<StatCardProps> = ({
   }, [animationDelay]);
 
   useEffect(() => {
-    // Animated counter effect
-    if (isVisible) {
+    if (loading) {
+      setDisplayValue(<Skeleton height={28} width={120} />);
+      return;
+    }
+
+    if (isVisible && typeof value === 'string') {
       let startValue = 0;
-      const duration = 1500; // ms
+      const duration = 1500;
       const startTime = Date.now();
-      
+
       const updateValue = () => {
         const currentTime = Date.now();
         const elapsed = currentTime - startTime;
-        
+
         if (elapsed < duration) {
-          // Easing function for smoother animation
           const progress = 1 - Math.pow(1 - elapsed / duration, 3);
           const current = Math.floor(progress * numericValue);
-          
-          // Format with the same pattern as the original value
-          const formatted = value.replace(/\d+/, current.toString());
+
+          const formatted = value.replace(/\d[\d,.]*/, current.toLocaleString());
           setDisplayValue(formatted);
-          
+
           requestAnimationFrame(updateValue);
         } else {
           setDisplayValue(value);
         }
       };
-      
+
       requestAnimationFrame(updateValue);
+    } else {
+      setDisplayValue(value);
     }
-  }, [isVisible, numericValue, value]);
+  }, [isVisible, loading, numericValue, value]);
 
   return (
-    <div 
+    <div
       ref={cardRef}
       className={clsx(
         'transform transition-all duration-700 ease-out',
         isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
       )}
     >
-      <Card 
+      <Card
         interactive
         variant={isImportant ? 'gradient' : 'default'}
         glow={isImportant}
@@ -112,15 +117,13 @@ export const StatCard: React.FC<StatCardProps> = ({
         <div className="flex items-center justify-between p-5">
           <div className="flex-1 space-y-2">
             <p className="text-sm font-medium text-secondary-600 tracking-wide uppercase">{title}</p>
-            <p className="text-2xl font-bold text-secondary-900 tracking-tight">{displayValue}</p>
-            {change && (
+            <div className="text-2xl font-bold text-secondary-900 tracking-tight h-8 flex items-center">
+              {displayValue}
+            </div>
+            {change && !loading && (
               <div className="flex items-center space-x-1 mt-2">
-                <span className={`text-sm font-medium ${changeColors[changeType]}`}>
-                  {changeIcons[changeType]}
-                </span>
-                <span className={`text-sm ${changeColors[changeType]}`}>
-                  {change}
-                </span>
+                <span className={`text-sm font-medium ${changeColors[changeType]}`}>{changeIcons[changeType]}</span>
+                <span className={`text-sm ${changeColors[changeType]}`}>{change}</span>
               </div>
             )}
           </div>
@@ -135,12 +138,12 @@ export const StatCard: React.FC<StatCardProps> = ({
             )} />
           </div>
         </div>
-        
-        {/* Decorative element for visual interest */}
+
         <div className={clsx(
           'h-1 w-full',
-          changeType === 'positive' ? 'bg-green-500' : 
-          changeType === 'negative' ? 'bg-red-500' : 
+          loading ? 'bg-gray-200' :
+          changeType === 'positive' ? 'bg-green-500' :
+          changeType === 'negative' ? 'bg-red-500' :
           'bg-primary-500'
         )}></div>
       </Card>
